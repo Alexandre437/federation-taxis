@@ -1,13 +1,14 @@
 // app/api/members/admin/route.ts
+// app/api/members/admin/route.ts
 import { NextResponse } from "next/server";
-import { get, put } from "@vercel/blob";
+import { list, put } from "@vercel/blob";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import type { Member, MembersManifest } from "@/types/members";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions as any);
-  const role = (session?.user as any)?.role;
+  const role = (session?.user as { role?: "ADMIN" | "DRIVER" } | undefined)?.role;
   if (!session || role !== "ADMIN") {
     return new NextResponse("Unauthorized", { status: 401 });
   }
@@ -26,19 +27,24 @@ export async function POST(req: Request) {
   const key = process.env.MEMBERS_MANIFEST_KEY!;
   let manifest: MembersManifest = { items: [], updatedAt: new Date().toISOString() };
 
+  // Load existing manifest if present
   try {
-    const file = await get(key);
-    const res = await fetch(file.url, { cache: "no-store" });
-    manifest = (await res.json()) as MembersManifest;
+    const { blobs } = await list({ prefix: key });
+    const file = blobs.find((b) => b.pathname === key);
+    if (file) {
+      const r = await fetch(file.url, { cache: "no-store" });
+      manifest = (await r.json()) as MembersManifest;
+    }
   } catch {
-    // no manifest yet, keep empty
+    // keep empty manifest
   }
 
-  const normalizedEmail = email.toLowerCase();
+  const normalizedEmail = email.toLowerCase().trim();
   const idx = manifest.items.findIndex((m) => m.email.toLowerCase() === normalizedEmail);
+
   const newItem: Member = {
     email: normalizedEmail,
-    name: name?.trim() || manifest.items[idx]?.name || "",
+    name: (name ?? manifest.items[idx]?.name ?? "").trim(),
     memberId: memberId.trim(),
     paidUntil: paidUntil.trim(),
   };
