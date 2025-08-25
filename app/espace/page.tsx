@@ -1,3 +1,4 @@
+// app/espace/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -6,10 +7,9 @@ import { useRouter } from "next/navigation";
 import type { Member, MembersManifest } from "@/types/members";
 
 export default function Espace() {
-  // ✅ All hooks first, no early returns before them
+  // ✅ all hooks first
   const { data: session, status } = useSession();
   const router = useRouter();
-
   const [items, setItems] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,8 +37,10 @@ export default function Espace() {
     [items, email]
   );
 
-  // ✅ Now we can return conditionally
-  if (status === "loading" || loading) return <div style={{ minHeight: "60vh" }}>Chargement…</div>;
+  // ✅ now conditional returns
+  if (status === "loading" || loading) {
+    return <div style={{ minHeight: "60vh" }}>Chargement…</div>;
+  }
   if (!session) return null;
 
   const today = new Date();

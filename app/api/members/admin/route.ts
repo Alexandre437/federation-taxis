@@ -5,11 +5,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import type { Member, MembersManifest } from "@/types/members";
 
-type Role = "ADMIN" | "DRIVER" | undefined;
+type Role = "ADMIN" | "DRIVER";
+type SessionUser = { email?: string | null; role?: Role };
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions); // ✅ no "as any"
-  const role: Role = (session?.user as { role?: Role } | undefined)?.role;
+  // ✅ no "as any"
+  const session = await getServerSession(authOptions);
+  const role = (session?.user as SessionUser | undefined)?.role;
 
   if (!session || role !== "ADMIN") {
     return new NextResponse("Unauthorized", { status: 401 });
