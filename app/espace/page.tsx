@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import type { Member, MembersManifest } from "@/types/members";
 
 export default function Espace() {
-  // ✅ all hooks first
+  // ✅ All hooks first
   const { data: session, status } = useSession();
   const router = useRouter();
   const [items, setItems] = useState<Member[]>([]);
@@ -37,7 +37,7 @@ export default function Espace() {
     [items, email]
   );
 
-  // ✅ now conditional returns
+  // ✅ Only now do conditional returns
   if (status === "loading" || loading) {
     return <div style={{ minHeight: "60vh" }}>Chargement…</div>;
   }
