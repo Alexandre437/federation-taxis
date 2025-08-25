@@ -1,12 +1,20 @@
+// app/admin/members/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import type { Member, MembersManifest } from "@/types/members";
+
+type Member = {
+  email: string;
+  name?: string;
+  memberId: string;
+  paidUntil: string; // YYYY-MM-DD
+};
+type MembersManifest = { items: Member[]; updatedAt: string };
 
 export default function AdminMembers() {
   const { data: session, status } = useSession();
-  const role = (session?.user as any)?.role;
+  const role = (session?.user as { role?: "ADMIN" | "DRIVER" } | undefined)?.role;
 
   const [items, setItems] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
