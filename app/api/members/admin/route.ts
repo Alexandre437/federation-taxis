@@ -1,5 +1,4 @@
 // app/api/members/admin/route.ts
-// app/api/members/admin/route.ts
 import { NextResponse } from "next/server";
 import { list, put } from "@vercel/blob";
 import { getServerSession } from "next-auth";
@@ -9,17 +8,11 @@ import type { Member, MembersManifest } from "@/types/members";
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions as any);
   const role = (session?.user as { role?: "ADMIN" | "DRIVER" } | undefined)?.role;
-  if (!session || role !== "ADMIN") {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
-
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return new NextResponse("BLOB token missing", { status: 500 });
-  }
+  if (!session || role !== "ADMIN") return new NextResponse("Unauthorized", { status: 401 });
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return new NextResponse("BLOB token missing", { status: 500 });
 
   const body = (await req.json()) as Partial<Member>;
   const { email, name, memberId, paidUntil } = body;
-
   if (!email || !memberId || !paidUntil) {
     return new NextResponse("email, memberId, paidUntil are required", { status: 400 });
   }
@@ -27,7 +20,6 @@ export async function POST(req: Request) {
   const key = process.env.MEMBERS_MANIFEST_KEY!;
   let manifest: MembersManifest = { items: [], updatedAt: new Date().toISOString() };
 
-  // Load existing manifest if present
   try {
     const { blobs } = await list({ prefix: key });
     const file = blobs.find((b) => b.pathname === key);
@@ -35,9 +27,7 @@ export async function POST(req: Request) {
       const r = await fetch(file.url, { cache: "no-store" });
       manifest = (await r.json()) as MembersManifest;
     }
-  } catch {
-    // keep empty manifest
-  }
+  } catch {}
 
   const normalizedEmail = email.toLowerCase().trim();
   const idx = manifest.items.findIndex((m) => m.email.toLowerCase() === normalizedEmail);

@@ -6,7 +6,6 @@ import { list } from "@vercel/blob";
 export async function GET() {
   const key = process.env.MEMBERS_MANIFEST_KEY!;
   try {
-    // Find the file by listing with its exact key
     const { blobs } = await list({ prefix: key });
     const file = blobs.find((b) => b.pathname === key);
 
@@ -23,5 +22,4 @@ export async function GET() {
     return NextResponse.json(empty);
   }
 }
-
 
