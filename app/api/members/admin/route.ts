@@ -5,14 +5,22 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import type { Member, MembersManifest } from "@/types/members";
 
+type Role = "ADMIN" | "DRIVER" | undefined;
+
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions as any);
-  const role = (session?.user as { role?: "ADMIN" | "DRIVER" } | undefined)?.role;
-  if (!session || role !== "ADMIN") return new NextResponse("Unauthorized", { status: 401 });
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return new NextResponse("BLOB token missing", { status: 500 });
+  const session = await getServerSession(authOptions); // ✅ no "as any"
+  const role: Role = (session?.user as { role?: Role } | undefined)?.role;
+
+  if (!session || role !== "ADMIN") {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return new NextResponse("BLOB token missing", { status: 500 });
+  }
 
   const body = (await req.json()) as Partial<Member>;
   const { email, name, memberId, paidUntil } = body;
+
   if (!email || !memberId || !paidUntil) {
     return new NextResponse("email, memberId, paidUntil are required", { status: 400 });
   }
@@ -27,7 +35,9 @@ export async function POST(req: Request) {
       const r = await fetch(file.url, { cache: "no-store" });
       manifest = (await r.json()) as MembersManifest;
     }
-  } catch {}
+  } catch {
+    // keep empty manifest
+  }
 
   const normalizedEmail = email.toLowerCase().trim();
   const idx = manifest.items.findIndex((m) => m.email.toLowerCase() === normalizedEmail);

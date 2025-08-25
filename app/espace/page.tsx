@@ -6,11 +6,14 @@ import { useRouter } from "next/navigation";
 import type { Member, MembersManifest } from "@/types/members";
 
 export default function Espace() {
+  // ✅ All hooks first, no early returns before them
   const { data: session, status } = useSession();
   const router = useRouter();
 
   const [items, setItems] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const email = (session?.user?.email ?? "").toLowerCase();
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -18,23 +21,29 @@ export default function Espace() {
 
   useEffect(() => {
     async function load() {
-      const res = await fetch("/api/members", { cache: "no-store" });
-      const data = (await res.json()) as MembersManifest;
-      setItems(data.items || []);
-      setLoading(false);
+      try {
+        const res = await fetch("/api/members", { cache: "no-store" });
+        const data = (await res.json()) as MembersManifest;
+        setItems(data.items || []);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
 
+  const member = useMemo(
+    () => items.find((m) => m.email.toLowerCase() === email) ?? null,
+    [items, email]
+  );
+
+  // ✅ Now we can return conditionally
   if (status === "loading" || loading) return <div style={{ minHeight: "60vh" }}>Chargement…</div>;
   if (!session) return null;
 
-  const email = session.user?.email?.toLowerCase() ?? "";
-  const member = useMemo(() => items.find((m) => m.email.toLowerCase() === email) ?? null, [items, email]);
-
   const today = new Date();
   const paidUntil = member?.paidUntil ? new Date(member.paidUntil) : null;
-  const isActive = paidUntil ? paidUntil >= new Date(today.toDateString()) : false;
+  const isActive = !!paidUntil && paidUntil >= new Date(today.toDateString());
   const daysLeft = paidUntil ? Math.ceil((paidUntil.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
   return (
