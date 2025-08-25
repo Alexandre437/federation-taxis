@@ -3,7 +3,7 @@ export type Member = {
   email: string;
   name?: string;
   memberId: string;
-  paidUntil: string; // ISO date, e.g. "2025-12-31"
+  paidUntil: string; // YYYY-MM-DD
 };
 
 export const members: Member[] = [
@@ -17,13 +17,11 @@ export const members: Member[] = [
     email: "admin@example.com",
     name: "Admin Démo",
     memberId: "FGTO-ADMIN",
-    paidUntil: "2024-12-31", // expiré pour la démo
+    paidUntil: "2024-12-31", // expiré pour démo
   },
 ];
 
-// Helper: find the member by email
 export function findMemberByEmail(email?: string | null): Member | null {
   if (!email) return null;
-  const m = members.find((x) => x.email.toLowerCase() === email.toLowerCase());
-  return m ?? null;
+  return members.find(m => m.email.toLowerCase() === email.toLowerCase()) ?? null;
 }
