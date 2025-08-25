@@ -5,12 +5,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import type { Member, MembersManifest } from "@/types/members";
 
-// Narrow types to avoid "any"
+// Strict types (no "any")
 type Role = "ADMIN" | "DRIVER";
 type SessionUser = { email?: string | null; role?: Role };
 
 export async function POST(req: Request) {
-  // ✅ no "as any" here
+  // ✅ no "as any"
   const session = await getServerSession(authOptions);
   const role = (session?.user as SessionUser | undefined)?.role;
 

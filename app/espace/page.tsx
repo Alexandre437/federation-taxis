@@ -1,12 +1,13 @@
 // app/espace/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import type { Member, MembersManifest } from "@/types/members";
 
 export default function Espace() {
+  // ✅ All hooks first
   const { data: session, status } = useSession();
   const router = useRouter();
   const [items, setItems] = useState<Member[]>([]);
@@ -31,13 +32,14 @@ export default function Espace() {
     load();
   }, []);
 
-  const member = useMemo(
-    () => items.find((m) => m.email.toLowerCase() === email) ?? null,
-    [items, email]
-  );
-
-  if (status === "loading" || loading) return <div style={{ minHeight: "60vh" }}>Chargement…</div>;
+  // ✅ Now we can return conditionally
+  if (status === "loading" || loading) {
+    return <div style={{ minHeight: "60vh" }}>Chargement…</div>;
+  }
   if (!session) return null;
+
+  // Not a hook — just a variable
+  const member = items.find((m) => m.email.toLowerCase() === email) ?? null;
 
   const today = new Date();
   const paidUntil = member?.paidUntil ? new Date(member.paidUntil) : null;
@@ -61,6 +63,7 @@ export default function Espace() {
               <div>N° Membre</div><div style={styles.kvVal}>{member.memberId}</div>
               <div>Valide jusqu’au</div><div style={styles.kvVal}>{paidUntil ? paidUntil.toLocaleDateString() : "—"}</div>
             </div>
+
             <div style={{ marginTop: 12 }}>
               {isActive ? (
                 <span style={styles.badgeOk}>✅ En ordre — {daysLeft} jour{Math.abs(daysLeft) > 1 ? "s" : ""} restants</span>
