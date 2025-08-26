@@ -1,5 +1,6 @@
 // app/page.tsx
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -7,16 +8,15 @@ export default function Home() {
       {/* HERO */}
       <section style={styles.hero}>
         <div style={styles.heroInner}>
-          <div style={styles.badge}>
-            🚖 Fédération des Taxis de Genève
-          </div>
+          <div style={styles.badge}>🚖 Fédération des Taxis de Genève</div>
 
           {/* Logo officiel FGTO */}
-          <img
+          <Image
             src="/images/taxi-logo.jpeg"
             alt="Logo FGTO"
             width={100}
             height={100}
+            priority
             style={{ margin: "0 auto 16px", display: "block" }}
           />
 
@@ -76,7 +76,11 @@ export default function Home() {
             <p style={styles.infoText}>
               📍 Rue du Rhône 15, 1204 Genève<br />
               📞 +41 22 123 45 67<br />
-              ✉️ <a href="mailto:contact@federation-taxis-ge.ch" style={styles.link}>
+              ✉️{" "}
+              <a
+                href="mailto:contact@federation-taxis-ge.ch"
+                style={styles.link}
+              >
                 contact@federation-taxis-ge.ch
               </a>
             </p>
@@ -102,9 +106,7 @@ export default function Home() {
       <footer style={styles.footer}>
         <div style={styles.footerInner}>
           <div>© {new Date().getFullYear()} Fédération des Taxis de Genève</div>
-          <div style={{ opacity: 0.7 }}>
-            Qualité • Sécurité • Service
-          </div>
+          <div style={{ opacity: 0.7 }}>Qualité • Sécurité • Service</div>
         </div>
       </footer>
     </div>

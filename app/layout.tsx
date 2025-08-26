@@ -1,5 +1,7 @@
+// app/layout.tsx
 import "./globals.css";
 import Link from "next/link";
+import Image from "next/image";
 import SessionProvider from "@/components/SessionProvider";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -40,11 +42,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 textDecoration: "none",
               }}
             >
-              <img
+              <Image
                 src="/images/taxi-logo.jpeg"
                 alt="Logo Fédération Genevoise des Taxis Officiels"
                 width={40}
                 height={40}
+                priority
                 style={{ borderRadius: "50%" }}
               />
               <span
