@@ -11,10 +11,12 @@ export default function AdminCourriersPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [letters, setLetters] = useState<Letter[]>([]);
 
+  // Load current letters
   useEffect(() => {
     (async () => {
       try {
         const r = await fetch("/api/courriers", { cache: "no-store" });
+        if (!r.ok) return;
         const data = (await r.json()) as LettersManifest;
         setLetters(data.items || []);
       } catch {
@@ -23,45 +25,47 @@ export default function AdminCourriersPage() {
     })();
   }, []);
 
-  const canSubmit = useMemo(() => !!title && !!date && !!file && !loading, [title, date, file, loading]);
+  const canSubmit = useMemo(
+    () => !!title && !!date && !!file && !loading,
+    [title, date, file, loading]
+  );
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-  e.preventDefault();
-  if (!file) return;
-  setLoading(true);
-  setMessage(null);
+    e.preventDefault();
+    if (!file) return;
+    setLoading(true);
+    setMessage(null);
 
-  try {
-    const fd = new FormData();
-    fd.set("title", title);
-    fd.set("date", date);
-    fd.set("file", file);
+    try {
+      const fd = new FormData();
+      fd.set("title", title);
+      fd.set("date", date);
+      fd.set("file", file);
 
-    const r = await fetch("/api/courriers/admin", {
-      method: "POST",
-      body: fd,
-    });
+      const r = await fetch("/api/courriers/admin", {
+        method: "POST",
+        body: fd,
+      });
 
-    if (!r.ok) {
-      const txt = await r.text();
-      throw new Error(txt || "Upload failed");
+      if (!r.ok) {
+        const txt = await r.text();
+        throw new Error(txt || "Upload failed");
+      }
+
+      const data: unknown = await r.json();
+      const item = (data as { item: Letter }).item;
+
+      setLetters((prev) => [item, ...prev]);
+      setTitle("");
+      setDate("");
+      setFile(null);
+      setMessage("Courrier enregistré ✅");
+    } catch (err: unknown) {
+      setMessage(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setLoading(false);
     }
-
-    const data: unknown = await r.json();
-    const item = (data as { item: Letter }).item;
-
-    setLetters((prev) => [item, ...prev]);
-    setTitle("");
-    setDate("");
-    setFile(null);
-    setMessage("Courrier enregistré ✅");
-  } catch (err: unknown) {              // ✅ use unknown instead of any
-    setMessage(err instanceof Error ? err.message : "Erreur");
-  } finally {
-    setLoading(false);
   }
-}
-
 
   return (
     <div className="mx-auto max-w-2xl p-6">
@@ -118,12 +122,19 @@ export default function AdminCourriersPage() {
           <li key={l.slug} className="rounded-md border p-3">
             <div className="font-medium">{l.title}</div>
             <div className="text-sm text-gray-600">{l.date}</div>
-            <a href={l.pdfUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-600 underline">
+            <a
+              href={l.pdfUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-blue-600 underline"
+            >
               Ouvrir le PDF
             </a>
           </li>
         ))}
-        {letters.length === 0 && <li className="text-sm text-gray-600">Aucun courrier pour le moment.</li>}
+        {letters.length === 0 && (
+          <li className="text-sm text-gray-600">Aucun courrier pour le moment.</li>
+        )}
       </ul>
     </div>
   );
