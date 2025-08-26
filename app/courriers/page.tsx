@@ -1,11 +1,19 @@
 // app/courriers/page.tsx
 import Link from "next/link";
-import { letters } from "@/data/letters";
+import type { LettersManifest } from "@/types/letters";
 
-export default function Courriers() {
-  const published = letters
-    .filter((l) => l.published !== false)
-    .sort((a, b) => (a.date < b.date ? 1 : -1));
+async function getData() {
+  // Dynamic fetch at request time (no ISR), so relative URL is fine
+  const r = await fetch("/api/courriers", { cache: "no-store" });
+  if (!r.ok) throw new Error("Impossible de charger les courriers");
+  return (await r.json()) as LettersManifest;
+}
+
+export default async function Courriers() {
+  const { items } = await getData();
+
+  // sort by date desc (YYYY-MM-DD strings compare fine)
+  const published = [...items].sort((a, b) => (a.date < b.date ? 1 : -1));
 
   return (
     <div style={{ display: "grid", gap: 24 }}>
@@ -32,7 +40,9 @@ export default function Courriers() {
                     {new Date(l.date).toLocaleDateString()}
                   </div>
                 </div>
-                {l.summary && <p style={styles.cardText}>{l.summary}</p>}
+
+                {/* optional summary: none in manifest by default */}
+                {/* {l.summary && <p style={styles.cardText}>{l.summary}</p>} */}
 
                 <div style={styles.cardActions}>
                   <Link
@@ -50,6 +60,7 @@ export default function Courriers() {
                     <a
                       href={l.pdfUrl}
                       target="_blank"
+                      rel="noreferrer"
                       style={{ ...styles.button, ...styles.buttonGhost }}
                     >
                       📄 Télécharger le PDF
