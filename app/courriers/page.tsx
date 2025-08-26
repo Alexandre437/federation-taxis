@@ -2,7 +2,9 @@ import Link from "next/link";
 import type { LettersManifest } from "@/types/letters";
 
 async function getData() {
-  const r = await fetch("/api/courriers", { cache: "no-store" });
+  const base = process.env.NEXT_PUBLIC_SITE_URL!;
+  const r = await fetch(`${base}/api/courriers`, { cache: "no-store" });
+
   if (!r.ok) throw new Error("Impossible de charger les courriers");
   return (await r.json()) as LettersManifest;
 }

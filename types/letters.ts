@@ -1,11 +1,11 @@
 export type Letter = {
-  slug: string;           // e.g. "greve-2025-03-14"
-  title: string;          // e.g. "Grève du 14 mars 2025"
-  date: string;           // ISO date (YYYY-MM-DD)
-  pdfUrl: string;         // public URL in Blob
+  slug: string;        // e.g. "greve-2025-09-01"
+  title: string;       // display title
+  date: string;        // YYYY-MM-DD
+  pdfUrl: string;      // public Blob URL
 };
 
 export type LettersManifest = {
   items: Letter[];
-  updatedAt: string;      // ISO timestamp
+  updatedAt: string;   // ISO timestamp
 };

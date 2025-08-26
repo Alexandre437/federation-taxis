@@ -132,21 +132,31 @@ export default function AdminMembers() {
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={styles.table}>
+              <colgroup>
+                <col style={{ width: "40%" }} />
+                <col style={{ width: "25%" }} />
+                <col style={{ width: "15%" }} />
+                <col style={{ width: "20%" }} />
+              </colgroup>
               <thead>
                 <tr>
-                  <th>Email</th>
-                  <th>Nom</th>
-                  <th>N°</th>
-                  <th>Valide jusqu’au</th>
+                  <th style={styles.th}>Email</th>
+                  <th style={styles.th}>Nom</th>
+                  <th style={styles.th}>N°</th>
+                  <th style={styles.th}>Valide jusqu’au</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((m) => (
-                  <tr key={m.email} onClick={() => setForm(m)} style={{ cursor: "pointer" }}>
-                    <td>{m.email}</td>
-                    <td>{m.name ?? "—"}</td>
-                    <td>{m.memberId}</td>
-                    <td>{m.paidUntil}</td>
+                  <tr
+                    key={m.email}
+                    onClick={() => setForm(m)}
+                    style={styles.row}
+                  >
+                    <td style={styles.td}>{m.email}</td>
+                    <td style={styles.td}>{m.name ?? "—"}</td>
+                    <td style={styles.td}>{m.memberId}</td>
+                    <td style={styles.td}>{m.paidUntil}</td>
                   </tr>
                 ))}
               </tbody>
@@ -162,13 +172,56 @@ export default function AdminMembers() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  block: { border: "1px solid #27272a", borderRadius: 16, padding: 16, backgroundColor: "#0b0b0b" },
+  block: {
+    border: "1px solid #27272a",
+    borderRadius: 16,
+    padding: 16,
+    backgroundColor: "#0b0b0b",
+  },
   h1: { fontSize: 28, fontWeight: 900, margin: 0, color: "#fff" },
   h2Yellow: { fontSize: 18, fontWeight: 800, margin: "0 0 10px", color: "#facc15" },
   h2Red: { fontSize: 18, fontWeight: 800, margin: "0 0 10px", color: "#fca5a5" },
   p: { color: "#d4d4d8", lineHeight: 1.6, margin: "8px 0 0" },
-  input: { padding: 10, borderRadius: 8, border: "1px solid #333", background: "#0f0f10", color: "#fff" },
-  button: { display: "inline-block", padding: "10px 14px", borderRadius: 10, fontWeight: 800, fontSize: 14, cursor: "pointer" },
-  buttonPrimary: { backgroundColor: "#facc15", color: "#000", border: "1px solid #facc15" },
-  table: { width: "100%", borderCollapse: "collapse", color: "#e4e4e7" },
+  input: {
+    padding: 10,
+    borderRadius: 8,
+    border: "1px solid #333",
+    background: "#0f0f10",
+    color: "#fff",
+  },
+  button: {
+    display: "inline-block",
+    padding: "10px 14px",
+    borderRadius: 10,
+    fontWeight: 800,
+    fontSize: 14,
+    cursor: "pointer",
+  },
+  buttonPrimary: {
+    backgroundColor: "#facc15",
+    color: "#000",
+    border: "1px solid #facc15",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    color: "#e4e4e7",
+    fontSize: 14,
+  },
+  th: {
+    textAlign: "left",
+    padding: "8px 12px",
+    fontWeight: 700,
+    fontSize: 14,
+    color: "#a1a1aa",
+    borderBottom: "1px solid #27272a",
+  },
+  td: {
+    padding: "8px 12px",
+    borderBottom: "1px solid #1e1e1e",
+    verticalAlign: "top",
+  },
+  row: {
+    cursor: "pointer",
+  },
 };

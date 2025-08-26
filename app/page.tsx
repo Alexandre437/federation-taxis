@@ -24,7 +24,7 @@ export default function Home() {
             Le point de contact officiel des taxis à Genève
           </h1>
           <p style={styles.subtitle}>
-            Nous représentons les chauffeurs licenciés, défendons la profession et
+            Nous représentons les chauffeurs, défendons la profession et
             informons le public. Accédez aux courriers officiels, découvrez le comité
             et soutenez nos actions.
           </p>

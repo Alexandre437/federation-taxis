@@ -14,7 +14,7 @@ export default function Federation() {
       <section style={styles.block}>
         <h1 style={styles.h1}>La Fédération</h1>
         <p style={styles.p}>
-          La Fédération des Taxis de Genève représente les chauffeurs licenciés
+          La Fédération des Taxis de Genève représente les chauffeurs
           auprès des autorités et des partenaires, défend la profession et
           promeut un service de qualité pour le public.
         </p>

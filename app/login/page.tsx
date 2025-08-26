@@ -1,40 +1,97 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { signIn, signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 
-export default function Login() {
-  const router = useRouter();
-  const [email, setEmail] = useState("driver@example.com");
-  const [password, setPassword] = useState("driver123");
-  const [error, setError] = useState<string | null>(null);
+export default function LoginPage() {
+  const { data: session } = useSession();
+  const [email, setEmail] = useState("admin@example.com");
+  const [password, setPassword] = useState("admin123");
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  if (session?.user) {
+    return (
+      <div className="mx-auto max-w-md border rounded-xl p-6">
+        <p className="mb-2">
+          Connecté comme <b>{session.user.email}</b>{" "}
+          {session.user.role ? `(role: ${session.user.role})` : ""}
+        </p>
+        <div className="flex gap-3">
+          <Link href="/espace" className="underline text-blue-400">
+            Aller à l’Espace Chauffeurs
+          </Link>
+          <Link href="/admin/members" className="underline text-blue-400">
+            Ouvrir l’Admin (membres)
+          </Link>
+        </div>
+        <button
+          onClick={() => signOut({ callbackUrl: "/" })}
+          className="mt-4 rounded-md bg-black text-white px-4 py-2 border border-zinc-700"
+        >
+          Se déconnecter
+        </button>
+      </div>
+    );
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null);
-    const res = await signIn("credentials", { email, password, redirect: false });
-    if (res?.error) setError("Identifiants incorrects");
-    else router.push("/espace");
+    setLoading(true);
+    setMsg(null);
+    const res = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    });
+    setLoading(false);
+    if (res?.ok) {
+      window.location.href = "/"; // or keep on /login; session will show
+    } else {
+      setMsg("Identifiants invalides");
+    }
   }
 
   return (
-    <div style={{ minHeight: "60vh", maxWidth: "400px", margin: "0 auto" }}>
-      <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "16px" }}>Connexion Chauffeurs</h1>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-        <input type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)}
-               style={{ padding: "10px", borderRadius: "6px", border: "1px solid #333" }} />
-        <input type="password" placeholder="Mot de passe" value={password} onChange={e=>setPassword(e.target.value)}
-               style={{ padding: "10px", borderRadius: "6px", border: "1px solid #333" }} />
-        <button type="submit" style={{ backgroundColor: "#facc15", color:"#000", fontWeight:"bold", padding:"10px",
-                 borderRadius:"6px", border:"none", cursor:"pointer" }}>
-          Se connecter
+    <div className="mx-auto max-w-md border rounded-xl p-6">
+      <h1 className="text-xl font-semibold mb-4">Connexion</h1>
+      <form onSubmit={onSubmit} className="space-y-3">
+        <div>
+          <label className="block text-sm mb-1">Email</label>
+          <input
+            className="w-full rounded-md border px-3 py-2 bg-transparent"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="admin@example.com"
+          />
+        </div>
+        <div>
+          <label className="block text-sm mb-1">Mot de passe</label>
+          <input
+            type="password"
+            className="w-full rounded-md border px-3 py-2 bg-transparent"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="admin123"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="rounded-md bg-black text-white px-4 py-2 border border-zinc-700 disabled:opacity-50"
+        >
+          {loading ? "Connexion..." : "Se connecter"}
         </button>
-        {error && <p style={{ color: "#f87171" }}>{error}</p>}
+        {msg && <p className="text-sm text-red-400">{msg}</p>}
       </form>
-      <p style={{ marginTop: "12px", color: "#aaa", fontSize: "14px" }}>
-        Démo : <code>driver@example.com</code> / <code>driver123</code>
-      </p>
+
+      <div className="mt-6 text-sm text-zinc-400">
+        Comptes de démo :<br />
+        admin@example.com / admin123 (ADMIN)<br />
+        driver@example.com / driver123 (DRIVER)
+      </div>
     </div>
   );
 }
+

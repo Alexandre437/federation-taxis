@@ -1,60 +1,46 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { LettersManifest, Letter } from "@/types/letters";
+import type { Letter, LettersManifest } from "@/types/letters";
 
 export default function AdminCourriersPage() {
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState(""); // YYYY-MM-DD
+  const [date, setDate] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [letters, setLetters] = useState<Letter[]>([]);
 
-  // Load current letters
   useEffect(() => {
     (async () => {
       try {
-        const r = await fetch("/api/courriers", { cache: "no-store" });
-        if (!r.ok) return;
+        const base = process.env.NEXT_PUBLIC_SITE_URL!;
+        const r = await fetch(`${base}/api/courriers`, { cache: "no-store" });
         const data = (await r.json()) as LettersManifest;
         setLetters(data.items || []);
-      } catch {
-        // ignore
-      }
+      } catch {}
     })();
   }, []);
 
-  const canSubmit = useMemo(
-    () => !!title && !!date && !!file && !loading,
-    [title, date, file, loading]
-  );
+  const canSubmit = useMemo(() => !!title && !!date && !!file && !loading, [title, date, file, loading]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!file) return;
     setLoading(true);
     setMessage(null);
-
     try {
       const fd = new FormData();
       fd.set("title", title);
       fd.set("date", date);
       fd.set("file", file);
 
-      const r = await fetch("/api/courriers/admin", {
-        method: "POST",
-        body: fd,
-      });
-
+      const r = await fetch("/api/courriers/admin", { method: "POST", body: fd });
       if (!r.ok) {
         const txt = await r.text();
         throw new Error(txt || "Upload failed");
       }
-
-      const data: unknown = await r.json();
-      const item = (data as { item: Letter }).item;
-
+      const { item } = (await r.json()) as { item: Letter };
       setLetters((prev) => [item, ...prev]);
       setTitle("");
       setDate("");
@@ -105,11 +91,7 @@ export default function AdminCourriersPage() {
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className="rounded-md bg-black px-4 py-2 text-white disabled:opacity-50"
-        >
+        <button type="submit" disabled={!canSubmit} className="rounded-md bg-black px-4 py-2 text-white disabled:opacity-50">
           {loading ? "Enregistrement..." : "Enregistrer"}
         </button>
 
@@ -122,19 +104,12 @@ export default function AdminCourriersPage() {
           <li key={l.slug} className="rounded-md border p-3">
             <div className="font-medium">{l.title}</div>
             <div className="text-sm text-gray-600">{l.date}</div>
-            <a
-              href={l.pdfUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm text-blue-600 underline"
-            >
+            <a href={l.pdfUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-600 underline">
               Ouvrir le PDF
             </a>
           </li>
         ))}
-        {letters.length === 0 && (
-          <li className="text-sm text-gray-600">Aucun courrier pour le moment.</li>
-        )}
+        {letters.length === 0 && <li className="text-sm text-gray-600">Aucun courrier pour le moment.</li>}
       </ul>
     </div>
   );
